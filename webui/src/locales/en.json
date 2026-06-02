@@ -74,8 +74,10 @@
         "copyFailed": "Copy failed."
     },
     "landing": {
+        "tagline": "DeepSeek to OpenAI & Claude Compatible API Interface",
         "adminConsole": "Admin Console",
         "apiStatus": "API Status",
+        "footer": "© 2026 DS2API Project. Designed for flexibility & performance.",
         "features": {
             "compatibility": {
                 "title": "Full Compatibility",

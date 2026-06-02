@@ -3,21 +3,16 @@ import en from './locales/en.json'
 import zh from './locales/zh.json'
 import vi from './locales/vi.json'
 
-const STORAGE_KEY = 'ds2api_lang'
+const STORAGE_KEY = 'ds2api_lang_v2'
 const translations = { en, zh, vi }
 
 const I18nContext = createContext({
-    lang: 'zh',
+    lang: 'vi',
     setLang: () => {},
     t: (key) => key,
 })
 
-const getBrowserLang = () => {
-    if (typeof navigator === 'undefined') return 'zh'
-    const browserLang = navigator.language?.toLowerCase() || ''
-    if (browserLang.startsWith('vi')) return 'vi'
-    return browserLang.startsWith('zh') ? 'zh' : 'en'
-}
+const getDefaultLang = () => 'vi'
 
 const getValue = (obj, key) => {
     if (!obj) return undefined
@@ -36,8 +31,9 @@ const formatMessage = (message, vars) => {
 
 export const I18nProvider = ({ children }) => {
     const [lang, setLang] = useState(() => {
-        if (typeof localStorage === 'undefined') return getBrowserLang()
-        return localStorage.getItem(STORAGE_KEY) || getBrowserLang()
+        if (typeof localStorage === 'undefined') return getDefaultLang()
+        const storedLang = localStorage.getItem(STORAGE_KEY)
+        return translations[storedLang] ? storedLang : getDefaultLang()
     })
 
     useEffect(() => {

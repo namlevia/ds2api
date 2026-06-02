@@ -74,8 +74,10 @@
         "copyFailed": "Sao chép thất bại."
     },
     "landing": {
+        "tagline": "Giao diện API tương thích DeepSeek sang OpenAI & Claude",
         "adminConsole": "Bảng quản trị",
         "apiStatus": "Trạng thái API",
+        "footer": "© 2026 Dự án DS2API. Thiết kế linh hoạt và hiệu năng cao.",
         "features": {
             "compatibility": {
                 "title": "Tương thích đầy đủ",

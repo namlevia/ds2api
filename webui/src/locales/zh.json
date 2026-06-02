@@ -74,8 +74,10 @@
         "copyFailed": "复制失败"
     },
     "landing": {
+        "tagline": "DeepSeek 转 OpenAI 与 Claude 兼容 API 接口",
         "adminConsole": "管理面板",
         "apiStatus": "API 状态",
+        "footer": "© 2026 DS2API 项目。为灵活性与性能而设计。",
         "features": {
             "compatibility": {
                 "title": "全面兼容",
