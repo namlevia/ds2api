@@ -2,7 +2,8 @@
     "language": {
         "label": "语言",
         "english": "English",
-        "chinese": "中文"
+        "chinese": "中文",
+        "vietnamese": "Tiếng Việt"
     },
     "nav": {
         "accounts": {

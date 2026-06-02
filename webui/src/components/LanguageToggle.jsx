@@ -2,17 +2,18 @@ import { useI18n } from '../i18n'
 
 export default function LanguageToggle({ className = '' }) {
     const { lang, setLang, t } = useI18n()
-    const nextLang = lang === 'zh' ? 'en' : 'zh'
-    const label = nextLang === 'zh' ? t('language.chinese') : t('language.english')
 
     return (
-        <button
-            type="button"
-            onClick={() => setLang(nextLang)}
+        <select
+            value={lang}
+            onChange={(event) => setLang(event.target.value)}
             className={`text-xs font-semibold px-2 py-1 rounded-md border border-border bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors ${className}`}
             title={t('language.label')}
+            aria-label={t('language.label')}
         >
-            {label}
-        </button>
+            <option value="zh">{t('language.chinese')}</option>
+            <option value="en">{t('language.english')}</option>
+            <option value="vi">{t('language.vietnamese')}</option>
+        </select>
     )
 }

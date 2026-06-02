@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * DS2API 启动脚本 - 交互式菜单
+ * Script khởi động DS2API - menu tương tác
  *
- * 使用方法:
- *   node start.mjs          # 显示交互式菜单
- *   node start.mjs dev      # 开发模式（后端 + 前端热重载）
- *   node start.mjs prod     # 生产模式（编译后运行）
- *   node start.mjs build    # 编译后端二进制
- *   node start.mjs webui    # 构建前端静态文件
- *   node start.mjs install  # 安装前端依赖
- *   node start.mjs stop     # 停止所有服务
- *   node start.mjs status   # 查看服务状态
+ * Cách dùng:
+ *   node start.mjs          # Hiển thị menu tương tác
+ *   node start.mjs dev      # Chế độ dev (backend + frontend hot reload)
+ *   node start.mjs prod     # Chế độ production (chạy sau khi build)
+ *   node start.mjs build    # Biên dịch binary backend
+ *   node start.mjs webui    # Build file tĩnh frontend
+ *   node start.mjs install  # Cài dependency frontend
+ *   node start.mjs stop     # Dừng tất cả dịch vụ
+ *   node start.mjs status   # Xem trạng thái dịch vụ
  */
 
 import { spawn, execSync } from 'child_process';
@@ -22,13 +22,13 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// 判断是否为 Windows
+// Kiểm tra có phải Windows không
 const isWindows = process.platform === 'win32';
 
-// 编译产物路径
+// Đường dẫn artifact build
 const BINARY = join(__dirname, isWindows ? 'ds2api.exe' : 'ds2api');
 
-// 配置（从环境变量读取，与 Go 主程序保持一致）
+// Cấu hình (đọc từ biến môi trường, đồng bộ với chương trình Go chính)
 const CONFIG = {
   port: process.env.PORT || '5001',
   frontendPort: 5173,
@@ -38,16 +38,16 @@ const CONFIG = {
   staticAdminDir: process.env.DS2API_STATIC_ADMIN_DIR || join(__dirname, 'static', 'admin'),
 };
 
-// 国内镜像配置
+// Cấu hình mirror
 const MIRRORS = {
   goproxy: process.env.GOPROXY || 'https://goproxy.cn,direct',
   npm: process.env.NPM_REGISTRY || 'https://registry.npmmirror.com',
 };
 
-// 存储子进程
+// Lưu tiến trình con
 const processes = [];
 
-// 颜色输出
+// Màu output
 const colors = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
@@ -68,23 +68,23 @@ const log = {
   title: (msg) => console.log(`\n${colors.bright}${colors.magenta}${msg}${colors.reset}`),
 };
 
-// 清理并退出
+// Dọn dẹp và thoát
 function cleanup() {
   console.log('\n');
-  log.info('正在关闭所有服务...');
+  log.info('Đang tắt tất cả dịch vụ...');
   processes.forEach(proc => {
     if (proc && !proc.killed) {
       proc.kill('SIGTERM');
     }
   });
-  log.success('已退出');
+  log.success('Đã thoát');
   process.exit(0);
 }
 
 process.on('SIGINT', cleanup);
 process.on('SIGTERM', cleanup);
 
-// 检查命令是否存在
+// Kiểm tra command có tồn tại không
 function commandExists(cmd) {
   try {
     execSync(`${isWindows ? 'where' : 'which'} ${cmd}`, { stdio: 'ignore' });
@@ -94,12 +94,12 @@ function commandExists(cmd) {
   }
 }
 
-// 检查 Go 是否安装
+// Kiểm tra Go đã được cài chưa
 function checkGo() {
   return commandExists('go');
 }
 
-// 获取 Go 版本
+// Lấy phiên bản Go
 function getGoVersion() {
   try {
     return execSync('go version', { encoding: 'utf-8' }).trim();
@@ -108,27 +108,27 @@ function getGoVersion() {
   }
 }
 
-// 检查前端依赖是否已安装
+// Kiểm tra dependency frontend đã được cài chưa
 function checkFrontendDeps() {
   if (!existsSync(CONFIG.webuiDir)) return null;
   return existsSync(join(CONFIG.webuiDir, 'node_modules'));
 }
 
-// 检查前端是否已构建
+// Kiểm tra frontend đã build chưa
 function checkWebuiBuilt() {
   return existsSync(join(CONFIG.staticAdminDir, 'index.html'));
 }
 
-// 检查后端二进制是否存在
+// Kiểm tra binary backend có tồn tại không
 function binaryExists() {
   return existsSync(BINARY);
 }
 
-// 查找占用端口的进程 PID
+// Tìm PID tiến trình đang chiếm cổng
 function findPidByPort(port) {
   const numericPort = parseInt(port, 10);
   if (isNaN(numericPort)) return [];
-  
+
   try {
     if (isWindows) {
       const output = execSync(`netstat -ano | findstr :${numericPort} | findstr LISTENING`, {
@@ -155,7 +155,7 @@ function findPidByPort(port) {
   }
 }
 
-// 获取运行中的服务状态
+// Lấy trạng thái các dịch vụ đang chạy
 function getRunningStatus() {
   const backendPids = findPidByPort(CONFIG.port);
   const frontendPids = findPidByPort(CONFIG.frontendPort);
@@ -166,16 +166,16 @@ function getRunningStatus() {
   };
 }
 
-// 停止服务
+// Dừng dịch vụ
 async function stopServices() {
   const running = getRunningStatus();
 
   if (!running.isRunning) {
-    log.warn('没有检测到正在运行的服务');
+    log.warn('Không phát hiện dịch vụ nào đang chạy');
     return;
   }
 
-  log.title('========== 停止服务 ==========');
+  log.title('========== Dừng dịch vụ ==========');
 
   const killProcess = async (pid) => {
     try {
@@ -191,53 +191,53 @@ async function stopServices() {
         try {
           execSync(`kill -0 ${pid}`, { stdio: 'ignore' });
           execSync(`kill -9 ${pid}`, { stdio: 'ignore' });
-        } catch { /* 进程已退出 */ }
+        } catch { /* Tiến trình đã thoát */ }
       }
-    } catch { /* 进程可能已退出 */ }
+    } catch { /* Tiến trình có thể đã thoát */ }
   };
 
   if (running.backend.length > 0) {
-    log.info(`停止后端服务 (端口 ${CONFIG.port}, PID: ${running.backend.join(', ')})...`);
+    log.info(`Đang dừng dịch vụ backend (cổng ${CONFIG.port}, PID: ${running.backend.join(', ')})...`);
     for (const pid of running.backend) await killProcess(pid);
-    log.success('后端服务已停止');
+    log.success('Đã dừng dịch vụ backend');
   }
 
   if (running.frontend.length > 0) {
-    log.info(`停止前端服务 (端口 ${CONFIG.frontendPort}, PID: ${running.frontend.join(', ')})...`);
+    log.info(`Đang dừng dịch vụ frontend (cổng ${CONFIG.frontendPort}, PID: ${running.frontend.join(', ')})...`);
     for (const pid of running.frontend) await killProcess(pid);
-    log.success('前端服务已停止');
+    log.success('Đã dừng dịch vụ frontend');
   }
 }
 
-// 安装前端依赖
+// Cài dependency frontend
 async function installFrontendDeps() {
   if (!existsSync(CONFIG.webuiDir)) {
-    log.warn('webui 目录不存在，跳过前端依赖安装');
+    log.warn('Không có thư mục webui, bỏ qua cài dependency frontend');
     return;
   }
-  log.info(`安装前端依赖 (npm ci, registry: ${MIRRORS.npm})...`);
+  log.info(`Đang cài dependency frontend (npm ci, registry: ${MIRRORS.npm})...`);
   return new Promise((resolve, reject) => {
     const proc = spawn('npm', ['ci', '--registry', MIRRORS.npm], {
       cwd: CONFIG.webuiDir,
       stdio: 'inherit',
       shell: isWindows,
     });
-    proc.on('close', code => code === 0 ? resolve() : reject(new Error('前端依赖安装失败')));
+    proc.on('close', code => code === 0 ? resolve() : reject(new Error('Cài dependency frontend thất bại')));
   });
 }
 
-// 确保前端依赖已安装
+// Đảm bảo dependency frontend đã được cài
 async function ensureFrontendDeps() {
   if (checkFrontendDeps() === false) {
-    log.warn('检测到前端依赖未安装，正在安装...');
+    log.warn('Phát hiện dependency frontend chưa được cài, đang cài đặt...');
     await installFrontendDeps();
   }
 }
 
-// 编译后端二进制
+// Biên dịch binary backend
 async function buildBackend() {
-  if (!checkGo()) throw new Error('未找到 Go，请先安装 Go (https://go.dev/dl/)');
-  log.info(`编译后端二进制 (GOPROXY: ${MIRRORS.goproxy})...`);
+  if (!checkGo()) throw new Error('Không tìm thấy Go, vui lòng cài Go trước (https://go.dev/dl/)');
+  log.info(`Đang biên dịch binary backend (GOPROXY: ${MIRRORS.goproxy})...`);
   return new Promise((resolve, reject) => {
     const proc = spawn('go', ['build', '-o', BINARY, './cmd/ds2api'], {
       cwd: __dirname,
@@ -245,31 +245,31 @@ async function buildBackend() {
       shell: isWindows,
       env: { ...process.env, GOPROXY: MIRRORS.goproxy },
     });
-    proc.on('close', code => code === 0 ? resolve() : reject(new Error('后端编译失败')));
+    proc.on('close', code => code === 0 ? resolve() : reject(new Error('Biên dịch backend thất bại')));
   });
 }
 
-// 构建前端静态文件
+// Build file tĩnh frontend
 async function buildWebui() {
   if (!existsSync(CONFIG.webuiDir)) {
-    log.warn('webui 目录不存在');
+    log.warn('Không có thư mục webui');
     return;
   }
   await ensureFrontendDeps();
-  log.info('构建前端静态文件...');
+  log.info('Đang build file tĩnh frontend...');
   return new Promise((resolve, reject) => {
     const proc = spawn(
       'npm', ['run', 'build', '--', '--outDir', CONFIG.staticAdminDir, '--emptyOutDir'],
       { cwd: CONFIG.webuiDir, stdio: 'inherit', shell: isWindows }
     );
-    proc.on('close', code => code === 0 ? resolve() : reject(new Error('前端构建失败')));
+    proc.on('close', code => code === 0 ? resolve() : reject(new Error('Build frontend thất bại')));
   });
 }
 
-// 启动后端（开发模式：go run，无需预编译）
+// Khởi động backend (chế độ dev: go run, không cần biên dịch trước)
 async function startBackendDev() {
-  if (!checkGo()) throw new Error('未找到 Go，请先安装 Go (https://go.dev/dl/)');
-  log.info(`启动后端（go run）... 本地 http://127.0.0.1:${CONFIG.port}  绑定 0.0.0.0:${CONFIG.port}`);
+  if (!checkGo()) throw new Error('Không tìm thấy Go, vui lòng cài Go trước (https://go.dev/dl/)');
+  log.info(`Đang khởi động backend (go run)... Local http://127.0.0.1:${CONFIG.port}  bind 0.0.0.0:${CONFIG.port}`);
   const proc = spawn('go', ['run', './cmd/ds2api'], {
     cwd: __dirname,
     stdio: 'inherit',
@@ -285,13 +285,13 @@ async function startBackendDev() {
   return proc;
 }
 
-// 启动后端（生产模式：运行编译好的二进制）
+// Khởi động backend (chế độ production: chạy binary đã biên dịch)
 async function startBackendProd() {
   if (!binaryExists()) {
-    log.warn('未找到编译产物，正在编译...');
+    log.warn('Không tìm thấy artifact build, đang biên dịch...');
     await buildBackend();
   }
-  log.info(`启动后端（二进制）... 本地 http://127.0.0.1:${CONFIG.port}  绑定 0.0.0.0:${CONFIG.port}`);
+  log.info(`Đang khởi động backend (binary)... Local http://127.0.0.1:${CONFIG.port}  bind 0.0.0.0:${CONFIG.port}`);
   const proc = spawn(BINARY, [], {
     cwd: __dirname,
     stdio: 'inherit',
@@ -307,14 +307,14 @@ async function startBackendProd() {
   return proc;
 }
 
-// 启动前端开发服务器
+// Khởi động server dev frontend
 async function startFrontend() {
   if (!existsSync(CONFIG.webuiDir)) {
-    log.warn('webui 目录不存在，跳过前端启动');
+    log.warn('Không có thư mục webui, bỏ qua khởi động frontend');
     return null;
   }
   await ensureFrontendDeps();
-  log.info(`启动前端开发服务器... http://localhost:${CONFIG.frontendPort}`);
+  log.info(`Đang khởi động server dev frontend... http://localhost:${CONFIG.frontendPort}`);
   const proc = spawn('npm', ['run', 'dev'], {
     cwd: CONFIG.webuiDir,
     stdio: 'inherit',
@@ -324,20 +324,20 @@ async function startFrontend() {
   return proc;
 }
 
-// 显示状态信息
+// Hiển thị thông tin trạng thái
 function showStatus() {
   console.log('\n' + '─'.repeat(50));
-  log.success(`后端 API:  http://127.0.0.1:${CONFIG.port}`);
-  log.success(`管理界面: http://127.0.0.1:${CONFIG.port}/admin`);
-  log.info(`后端绑定:  0.0.0.0:${CONFIG.port} (可通过局域网 IP 访问)`);
+  log.success(`Backend API:  http://127.0.0.1:${CONFIG.port}`);
+  log.success(`Giao diện quản trị: http://127.0.0.1:${CONFIG.port}/admin`);
+  log.info(`Backend bind:  0.0.0.0:${CONFIG.port} (có thể truy cập qua IP LAN)`);
   if (existsSync(CONFIG.webuiDir)) {
-    log.success(`前端 Dev:  http://localhost:${CONFIG.frontendPort}`);
+    log.success(`Frontend Dev:  http://localhost:${CONFIG.frontendPort}`);
   }
   console.log('─'.repeat(50));
-  log.info('按 Ctrl+C 停止所有服务\n');
+  log.info('Nhấn Ctrl+C để dừng tất cả dịch vụ\n');
 }
 
-// 等待进程退出
+// Chờ các tiến trình thoát
 function waitForProcesses() {
   return new Promise(resolve => {
     const check = setInterval(() => {
@@ -350,17 +350,17 @@ function waitForProcesses() {
   });
 }
 
-// 交互式菜单
+// Menu tương tác
 async function showMenu() {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   const question = (prompt) => new Promise(resolve => rl.question(prompt, resolve));
 
   console.clear();
   log.title('╔══════════════════════════════════════════╗');
-  log.title('║         DS2API 启动脚本  (Go)            ║');
+  log.title('║       Script khởi động DS2API (Go)       ║');
   log.title('╚══════════════════════════════════════════╝');
 
-  // 环境状态
+  // Trạng thái môi trường
   const goVersion = getGoVersion();
   const frontendDeps = checkFrontendDeps();
   const webuiBuilt = checkWebuiBuilt();
@@ -369,44 +369,44 @@ async function showMenu() {
 
   const ok = (v) => v ? `${colors.green}✓${colors.reset}` : `${colors.yellow}✗${colors.reset}`;
 
-  console.log(`\n${colors.bright}环境状态:${colors.reset}`);
-  console.log(`  Go:          ${goVersion ? `${colors.green}${goVersion}${colors.reset}` : `${colors.red}未安装${colors.reset}`}`);
-  console.log(`  前端依赖:    ${frontendDeps === null ? `${colors.dim}N/A${colors.reset}` : frontendDeps ? `${colors.green}已安装${colors.reset}` : `${colors.yellow}未安装${colors.reset}`}`);
-  console.log(`  前端构建:    ${ok(webuiBuilt)} ${webuiBuilt ? `(${CONFIG.staticAdminDir})` : '未构建'}`);
-  console.log(`  后端二进制:  ${ok(hasBinary)} ${hasBinary ? BINARY : '未编译'}`);
+  console.log(`\n${colors.bright}Trạng thái môi trường:${colors.reset}`);
+  console.log(`  Go:             ${goVersion ? `${colors.green}${goVersion}${colors.reset}` : `${colors.red}Chưa cài${colors.reset}`}`);
+  console.log(`  Dependency FE:  ${frontendDeps === null ? `${colors.dim}N/A${colors.reset}` : frontendDeps ? `${colors.green}Đã cài${colors.reset}` : `${colors.yellow}Chưa cài${colors.reset}`}`);
+  console.log(`  Build FE:       ${ok(webuiBuilt)} ${webuiBuilt ? `(${CONFIG.staticAdminDir})` : 'Chưa build'}`);
+  console.log(`  Binary backend: ${ok(hasBinary)} ${hasBinary ? BINARY : 'Chưa biên dịch'}`);
 
-  console.log(`\n${colors.bright}服务状态:${colors.reset}`);
-  console.log(`  后端 (:${CONFIG.port}):    ${running.backend.length > 0 ? `${colors.green}运行中${colors.reset} (PID: ${running.backend.join(', ')})` : `${colors.dim}未运行${colors.reset}`}`);
-  console.log(`  前端 (:${CONFIG.frontendPort}): ${running.frontend.length > 0 ? `${colors.green}运行中${colors.reset} (PID: ${running.frontend.join(', ')})` : `${colors.dim}未运行${colors.reset}`}`);
+  console.log(`\n${colors.bright}Trạng thái dịch vụ:${colors.reset}`);
+  console.log(`  Backend (:${CONFIG.port}):    ${running.backend.length > 0 ? `${colors.green}Đang chạy${colors.reset} (PID: ${running.backend.join(', ')})` : `${colors.dim}Chưa chạy${colors.reset}`}`);
+  console.log(`  Frontend (:${CONFIG.frontendPort}): ${running.frontend.length > 0 ? `${colors.green}Đang chạy${colors.reset} (PID: ${running.frontend.join(', ')})` : `${colors.dim}Chưa chạy${colors.reset}`}`);
 
-  console.log(`\n${colors.bright}环境变量:${colors.reset}`);
+  console.log(`\n${colors.bright}Biến môi trường:${colors.reset}`);
   console.log(`  PORT:              ${colors.cyan}${CONFIG.port}${colors.reset}`);
   console.log(`  LOG_LEVEL:         ${colors.cyan}${CONFIG.logLevel}${colors.reset}`);
   console.log(`  DS2API_ADMIN_KEY:  ${colors.cyan}${CONFIG.adminKey}${colors.reset}`);
   console.log(`  GOPROXY:           ${colors.cyan}${MIRRORS.goproxy}${colors.reset}`);
   console.log(`  NPM_REGISTRY:      ${colors.cyan}${MIRRORS.npm}${colors.reset}`);
-  console.log(`${colors.dim}  自定义: DS2API_ADMIN_KEY=密钥 PORT=5001 node start.mjs${colors.reset}`);
+  console.log(`${colors.dim}  Tùy chỉnh: DS2API_ADMIN_KEY=secret PORT=5001 node start.mjs${colors.reset}`);
 
   console.log(`
-${colors.bright}请选择操作:${colors.reset}
+${colors.bright}Vui lòng chọn thao tác:${colors.reset}
 
-  ${colors.cyan}1.${colors.reset} 开发模式  (go run + 前端热重载)
-  ${colors.cyan}2.${colors.reset} 仅后端    (go run，无需编译)
-  ${colors.cyan}3.${colors.reset} 仅前端    (npm dev)
-  ${colors.cyan}4.${colors.reset} 生产模式  (编译后运行，前端已嵌入)
-  ${colors.cyan}5.${colors.reset} 编译后端  (go build)
-  ${colors.cyan}6.${colors.reset} 构建前端  (npm build → static/admin)
-  ${colors.cyan}7.${colors.reset} 安装前端依赖 (npm ci)
-  ${colors.red}8.${colors.reset} 停止所有服务
-  ${colors.cyan}0.${colors.reset} 退出
+  ${colors.cyan}1.${colors.reset} Chế độ dev        (go run + frontend hot reload)
+  ${colors.cyan}2.${colors.reset} Chỉ backend       (go run, không cần biên dịch)
+  ${colors.cyan}3.${colors.reset} Chỉ frontend      (npm dev)
+  ${colors.cyan}4.${colors.reset} Chế độ production (chạy sau khi biên dịch, frontend đã nhúng)
+  ${colors.cyan}5.${colors.reset} Biên dịch backend (go build)
+  ${colors.cyan}6.${colors.reset} Build frontend    (npm build → static/admin)
+  ${colors.cyan}7.${colors.reset} Cài dependency FE (npm ci)
+  ${colors.red}8.${colors.reset} Dừng tất cả dịch vụ
+  ${colors.cyan}0.${colors.reset} Thoát
 `);
 
-  const choice = await question(`${colors.yellow}请输入选项 [1]: ${colors.reset}`);
+  const choice = await question(`${colors.yellow}Nhập lựa chọn [1]: ${colors.reset}`);
   rl.close();
 
   switch (choice.trim() || '1') {
     case '1':
-      log.title('========== 开发模式 ==========');
+      log.title('========== Chế độ dev ==========');
       await startBackendDev();
       await new Promise(r => setTimeout(r, 1500));
       await startFrontend();
@@ -415,42 +415,42 @@ ${colors.bright}请选择操作:${colors.reset}
       break;
 
     case '2':
-      log.title('========== 仅后端 (go run) ==========');
+      log.title('========== Chỉ backend (go run) ==========');
       await startBackendDev();
       showStatus();
       await waitForProcesses();
       break;
 
     case '3':
-      log.title('========== 仅前端 ==========');
+      log.title('========== Chỉ frontend ==========');
       await startFrontend();
       showStatus();
       await waitForProcesses();
       break;
 
     case '4':
-      log.title('========== 生产模式 ==========');
+      log.title('========== Chế độ production ==========');
       await startBackendProd();
       showStatus();
       await waitForProcesses();
       break;
 
     case '5':
-      log.title('========== 编译后端 ==========');
+      log.title('========== Biên dịch backend ==========');
       await buildBackend();
-      log.success(`编译完成：${BINARY}`);
+      log.success(`Biên dịch hoàn tất: ${BINARY}`);
       break;
 
     case '6':
-      log.title('========== 构建前端 ==========');
+      log.title('========== Build frontend ==========');
       await buildWebui();
-      log.success('前端构建完成！');
+      log.success('Build frontend hoàn tất!');
       break;
 
     case '7':
-      log.title('========== 安装前端依赖 ==========');
+      log.title('========== Cài dependency frontend ==========');
       await installFrontendDeps();
-      log.success('前端依赖安装完成！');
+      log.success('Cài dependency frontend hoàn tất!');
       break;
 
     case '8':
@@ -458,24 +458,24 @@ ${colors.bright}请选择操作:${colors.reset}
       break;
 
     case '0':
-      log.info('再见！');
+      log.info('Tạm biệt!');
       process.exit(0);
       break;
 
     default:
-      log.warn('无效选项');
+      log.warn('Lựa chọn không hợp lệ');
       await showMenu();
   }
 }
 
-// 命令行参数处理
+// Xử lý tham số dòng lệnh
 async function main() {
   const cmd = process.argv[2];
 
   if (!checkGo() && !['install', 'webui', 'stop', 'status', 'help', '-h', '--help'].includes(cmd)) {
-    log.error('未找到 Go，请先安装 Go: https://go.dev/dl/');
+    log.error('Không tìm thấy Go, vui lòng cài Go trước: https://go.dev/dl/');
     if (!cmd) {
-      // 无 Go 时仍允许进入菜单（可以只操作前端）
+      // Khi không có Go, vẫn cho vào menu (có thể chỉ thao tác frontend)
     } else {
       process.exit(1);
     }
@@ -483,7 +483,7 @@ async function main() {
 
   switch (cmd) {
     case 'dev':
-      log.title('========== 开发模式 ==========');
+      log.title('========== Chế độ dev ==========');
       await startBackendDev();
       await new Promise(r => setTimeout(r, 1500));
       await startFrontend();
@@ -492,7 +492,7 @@ async function main() {
       break;
 
     case 'prod':
-      log.title('========== 生产模式 ==========');
+      log.title('========== Chế độ production ==========');
       await startBackendProd();
       showStatus();
       await waitForProcesses();
@@ -500,17 +500,17 @@ async function main() {
 
     case 'build':
       await buildBackend();
-      log.success(`编译完成：${BINARY}`);
+      log.success(`Biên dịch hoàn tất: ${BINARY}`);
       break;
 
     case 'webui':
       await buildWebui();
-      log.success('前端构建完成！');
+      log.success('Build frontend hoàn tất!');
       break;
 
     case 'install':
       await installFrontendDeps();
-      log.success('前端依赖安装完成！');
+      log.success('Cài dependency frontend hoàn tất!');
       break;
 
     case 'stop':
@@ -520,11 +520,11 @@ async function main() {
     case 'status': {
       const status = getRunningStatus();
       const goVer = getGoVersion();
-      console.log(`\n${colors.bright}环境:${colors.reset}`);
-      console.log(`  Go: ${goVer || `${colors.red}未安装${colors.reset}`}`);
-      console.log(`\n${colors.bright}服务状态:${colors.reset}`);
-      console.log(`  后端 (:${CONFIG.port}):    ${status.backend.length > 0 ? `${colors.green}运行中${colors.reset} (PID: ${status.backend.join(', ')})` : `${colors.dim}未运行${colors.reset}`}`);
-      console.log(`  前端 (:${CONFIG.frontendPort}): ${status.frontend.length > 0 ? `${colors.green}运行中${colors.reset} (PID: ${status.frontend.join(', ')})` : `${colors.dim}未运行${colors.reset}`}\n`);
+      console.log(`\n${colors.bright}Môi trường:${colors.reset}`);
+      console.log(`  Go: ${goVer || `${colors.red}Chưa cài${colors.reset}`}`);
+      console.log(`\n${colors.bright}Trạng thái dịch vụ:${colors.reset}`);
+      console.log(`  Backend (:${CONFIG.port}):    ${status.backend.length > 0 ? `${colors.green}Đang chạy${colors.reset} (PID: ${status.backend.join(', ')})` : `${colors.dim}Chưa chạy${colors.reset}`}`);
+      console.log(`  Frontend (:${CONFIG.frontendPort}): ${status.frontend.length > 0 ? `${colors.green}Đang chạy${colors.reset} (PID: ${status.frontend.join(', ')})` : `${colors.dim}Chưa chạy${colors.reset}`}\n`);
       break;
     }
 
@@ -532,27 +532,27 @@ async function main() {
     case '-h':
     case '--help':
       console.log(`
-${colors.bright}DS2API 启动脚本 (Go)${colors.reset}
+${colors.bright}Script khởi động DS2API (Go)${colors.reset}
 
-${colors.cyan}使用方法:${colors.reset}
-  node start.mjs              显示交互式菜单
-  node start.mjs dev          开发模式 (go run + 前端热重载)
-  node start.mjs prod         生产模式 (编译产物，前端已嵌入)
-  node start.mjs build        编译后端二进制 (go build)
-  node start.mjs webui        构建前端静态文件
-  node start.mjs install      安装前端依赖 (npm ci)
-  node start.mjs stop         停止所有服务
-  node start.mjs status       查看服务状态
+${colors.cyan}Cách dùng:${colors.reset}
+  node start.mjs              Hiển thị menu tương tác
+  node start.mjs dev          Chế độ dev (go run + frontend hot reload)
+  node start.mjs prod         Chế độ production (artifact đã biên dịch, frontend đã nhúng)
+  node start.mjs build        Biên dịch binary backend (go build)
+  node start.mjs webui        Build file tĩnh frontend
+  node start.mjs install      Cài dependency frontend (npm ci)
+  node start.mjs stop         Dừng tất cả dịch vụ
+  node start.mjs status       Xem trạng thái dịch vụ
 
-${colors.cyan}常用环境变量:${colors.reset}
-  PORT               后端端口 (默认: 5001)
-  LOG_LEVEL          日志级别: DEBUG|INFO|WARN|ERROR (默认: INFO)
-  DS2API_ADMIN_KEY   管理员密钥 (默认: admin)
-  DS2API_CONFIG_PATH 配置文件路径 (默认: config.json)
-  GOPROXY            Go 模块代理 (默认: https://goproxy.cn,direct)
-  NPM_REGISTRY       npm 镜像源 (默认: https://registry.npmmirror.com)
+${colors.cyan}Biến môi trường thường dùng:${colors.reset}
+  PORT               Cổng backend (mặc định: 5001)
+  LOG_LEVEL          Cấp độ log: DEBUG|INFO|WARN|ERROR (mặc định: INFO)
+  DS2API_ADMIN_KEY   Khóa quản trị (mặc định: admin)
+  DS2API_CONFIG_PATH Đường dẫn file cấu hình (mặc định: config.json)
+  GOPROXY            Go module proxy (mặc định: https://goproxy.cn,direct)
+  NPM_REGISTRY       npm registry (mặc định: https://registry.npmmirror.com)
 
-${colors.cyan}示例:${colors.reset}
+${colors.cyan}Ví dụ:${colors.reset}
   DS2API_ADMIN_KEY=mykey PORT=8080 node start.mjs dev
   GOPROXY=off NPM_REGISTRY=https://registry.npmjs.org node start.mjs dev
 `);
