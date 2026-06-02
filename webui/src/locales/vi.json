@@ -443,6 +443,7 @@
         "subtitle": "Nhập khóa quản trị để tiếp tục",
         "adminKeyLabel": "Khóa quản trị",
         "adminKeyPlaceholder": "Nhập khóa quản trị...",
+        "defaultAdminKeyHint": "Khóa quản trị mặc định: leviatech1234",
         "rememberSession": "Ghi nhớ phiên này",
         "signIn": "Đăng nhập",
         "secureConnection": "Kết nối an toàn",

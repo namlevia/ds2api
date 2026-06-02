@@ -443,6 +443,7 @@
         "subtitle": "Enter your admin key to continue",
         "adminKeyLabel": "Admin key",
         "adminKeyPlaceholder": "Enter your admin key...",
+        "defaultAdminKeyHint": "Default admin key: leviatech1234",
         "rememberSession": "Remember this session",
         "signIn": "Sign in",
         "secureConnection": "Secure connection",

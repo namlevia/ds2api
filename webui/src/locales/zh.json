@@ -443,6 +443,7 @@
         "subtitle": "请输入管理员密钥以继续",
         "adminKeyLabel": "管理员密钥",
         "adminKeyPlaceholder": "输入您的管理员密钥...",
+        "defaultAdminKeyHint": "默认管理员密钥：leviatech1234",
         "rememberSession": "记住登录状态",
         "signIn": "登录",
         "secureConnection": "安全连接",

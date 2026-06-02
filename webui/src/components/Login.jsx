@@ -76,6 +76,7 @@ export default function Login({ onLogin, onMessage }) {
                                     autoFocus
                                 />
                             </div>
+                            <p className="text-xs text-muted-foreground/60 ml-1">{t('login.defaultAdminKeyHint')}</p>
                         </div>
 
                         <div className="flex items-center justify-between px-1">
