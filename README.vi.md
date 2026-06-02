@@ -14,7 +14,7 @@
 [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/L4CFHP)
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CJackHwang/ds2api)
 
-Ngôn ngữ / Language: [中文](README.MD) | [English](README.en.md) | [Tiếng Việt](README.vi.md)
+Ngôn ngữ / Language: [中文](README.zh.md) | [English](README.en.md) | [Tiếng Việt](README.MD)
 
 DS2API chuyển đổi năng lực chat DeepSeek Web thành API tương thích OpenAI, Claude và Gemini. Backend lõi được viết bằng **Go**, có thêm một bridge Node Runtime nhỏ cho streaming trên Vercel, và bảng quản trị React WebUI nằm trong `webui/` (khi deploy sẽ tự build ra `static/admin`).
 
