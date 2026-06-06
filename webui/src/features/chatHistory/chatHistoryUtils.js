@@ -36,7 +36,7 @@ function normalizeHistoryRole(role) {
 export function formatDateTime(value, lang) {
     if (!value) return '-'
     try {
-        return new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : 'en-US', {
+        return new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : (lang === 'vi' ? 'vi-VN' : 'en-US'), {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
