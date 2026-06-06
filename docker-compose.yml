@@ -15,3 +15,4 @@ services:
       - LOG_LEVEL=INFO
       - DS2API_ADMIN_KEY=${DS2API_ADMIN_KEY:-leviatech1234}
       - DS2API_CONFIG_PATH=/data/config.json
+      - DS2API_DEV_PACKET_CAPTURE=true
