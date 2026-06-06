@@ -1,4 +1,5 @@
-import { X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Eye, EyeOff } from 'lucide-react'
 
 export default function AddAccountModal({
     show,
@@ -9,6 +10,14 @@ export default function AddAccountModal({
     onClose,
     onAdd,
 }) {
+    const [showPassword, setShowPassword] = useState(false)
+
+    useEffect(() => {
+        if (!show) {
+            setShowPassword(false)
+        }
+    }, [show])
+
     if (!show) {
         return null
     }
@@ -65,13 +74,22 @@ export default function AddAccountModal({
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1.5">{t('accountManager.passwordLabel')} <span className="text-destructive">*</span></label>
-                        <input
-                            type="password"
-                            className="input-field bg-[#09090b]"
-                            placeholder={t('accountManager.passwordPlaceholder')}
-                            value={newAccount.password}
-                            onChange={e => setNewAccount({ ...newAccount, password: e.target.value })}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                className="input-field bg-[#09090b] pr-10"
+                                placeholder={t('accountManager.passwordPlaceholder')}
+                                value={newAccount.password}
+                                onChange={e => setNewAccount({ ...newAccount, password: e.target.value })}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+                            </button>
+                        </div>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                         <button onClick={onClose} className="px-4 py-2 rounded-lg border border-border hover:bg-secondary transition-colors text-sm font-medium">{t('actions.cancel')}</button>
